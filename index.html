@@ -296,11 +296,13 @@
             "Content-Type": "application/json",
             "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
           },
-          body: JSON.stringify({
-            model: "nvidia/llama-3.1-nemotron-ultra-8b-v1",
-            messages: messages,
-            temperature: 0.7,
-            max_tokens: 2048,
+        
+body: JSON.stringify({
+    model: "nvidia/llama-3.1-nemotron-ultra-8b",  // Correct model ID (no -v1)
+    messages: messages,
+    temperature: 0.7,
+    max_tokens: 2048,
+}),
           }),
         });
 
