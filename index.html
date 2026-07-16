@@ -210,17 +210,15 @@
     </div>
   </div>
 
-  <!-- Optional: marked.js for markdown rendering (not required but nice) -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
-    // !!!!! PASTE YOUR OPENROUTER API KEY HERE !!!!!
+    // !!!!! REPLACE WITH YOUR REAL OPENROUTER API KEY !!!!!
     const OPENROUTER_API_KEY = "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";
 
     const chatMessages = document.getElementById("chatMessages");
     const userInput = document.getElementById("userInput");
     const sendButton = document.getElementById("sendButton");
 
-    // Conversation history (kept simple)
     let messages = [
       {
         role: "assistant",
@@ -228,7 +226,6 @@
       },
     ];
 
-    // Function to add a message to the UI
     function addMessage(role, text, isError = false) {
       const messageDiv = document.createElement("div");
       messageDiv.classList.add("message", role);
@@ -241,7 +238,6 @@
       contentDiv.classList.add("message-content");
       if (isError) contentDiv.classList.add("error");
 
-      // If bot and not an error, we can render markdown (optional)
       if (role === "bot" && !isError && typeof marked !== "undefined") {
         contentDiv.innerHTML = marked.parse(text);
       } else {
@@ -252,10 +248,9 @@
       messageDiv.appendChild(contentDiv);
       chatMessages.appendChild(messageDiv);
       chatMessages.scrollTop = chatMessages.scrollHeight;
-      return contentDiv; // return in case we need to update it (streaming not implemented)
+      return contentDiv;
     }
 
-    // Show typing indicator
     function showTypingIndicator() {
       const typingDiv = document.createElement("div");
       typingDiv.classList.add("message", "bot");
@@ -284,25 +279,22 @@
       const userText = userInput.value.trim();
       if (!userText) return;
 
-      // Disable input while processing
       userInput.disabled = true;
       sendButton.disabled = true;
 
-      // Add user message to UI and history
       addMessage("user", userText);
       messages.push({ role: "user", content: userText });
       userInput.value = "";
 
-      // Show typing indicator
       showTypingIndicator();
 
       try {
-        // Call OpenRouter API (non-streaming for simplicity)
+        // CORRECTED: using OPENROUTER_API_KEY variable
         const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${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}`,
+            "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
           },
           body: JSON.stringify({
             model: "nvidia/llama-3.1-nemotron-ultra-8b-v1",
@@ -322,17 +314,13 @@
         const data = await response.json();
         const botReply = data.choices[0].message.content;
 
-        // Add bot message
         addMessage("bot", botReply);
         messages.push({ role: "assistant", content: botReply });
       } catch (error) {
         hideTypingIndicator();
         console.error(error);
         addMessage("bot", `⚠️ Error: ${error.message}`, true);
-        // Remove the user message that failed from history? better keep it.
-        // But we need to handle: we added user message to messages array earlier.
-        // If error, we can remove that last user message to keep history clean.
-        messages.pop(); // remove the user message that caused error
+        messages.pop(); // remove the failed user message
       } finally {
         userInput.disabled = false;
         sendButton.disabled = false;
@@ -340,7 +328,6 @@
       }
     }
 
-    // Event listeners
     sendButton.addEventListener("click", sendMessage);
     userInput.addEventListener("keypress", (e) => {
       if (e.key === "Enter" && !e.shiftKey) {
