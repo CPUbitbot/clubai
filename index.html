@@ -70,6 +70,10 @@
     #sendButton:hover { background: #b4befe; }
     #sendButton:disabled { opacity: 0.5; cursor: not-allowed; }
     .error { background: #f38ba8 !important; color: #1e1e2e !important; }
+    .warning-box {
+      background: #f38ba8; color: #1e1e2e; padding: 10px; margin: 10px 0;
+      border-radius: 8px; font-weight: bold; text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -85,6 +89,7 @@
           Hello! I'm powered by Nemotron Ultra via OpenRouter. How can I help you today?
         </div>
       </div>
+      <!-- If key is missing, a warning will appear here -->
     </div>
     <div class="chat-input-area">
       <input type="text" id="userInput" placeholder="Type your message..." autofocus />
@@ -94,21 +99,23 @@
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
-    // ========== CONFIGURATION ==========
-    const OPENROUTER_API_KEY = "YOUR_NEW_API_KEY_HERE";  // <-- PASTE YOUR KEY
-    // Change this to the exact model ID from OpenRouter
-    const MODEL_ID = "nvidia/nemotron-3-ultra-550b-a55b:free";
-    // Optional test with a free model if you want to verify the API key
-    // const MODEL_ID = "meta-llama/llama-3.2-3b-instruct";
+    // ========== 🔑 REPLACE THIS WITH YOUR NEW API KEY ==========
+    const OPENROUTER_API_KEY = "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";
+    const MODEL_ID = "nvidia/llama-3.1-nemotron-ultra-8b";
 
-    // ========== DOM ELEMENTS ==========
+    // Show a warning if the key is still the placeholder
+    if (OPENROUTER_API_KEY === "YOUR_NEW_API_KEY_HERE" || OPENROUTER_API_KEY === "") {
+      const warningDiv = document.createElement("div");
+      warningDiv.className = "warning-box";
+      warningDiv.textContent = "⚠️ You forgot to add your OpenRouter API key! Open the HTML file and paste your key.";
+      document.getElementById("chatMessages").prepend(warningDiv);
+    }
+
     const chatMessages = document.getElementById("chatMessages");
     const userInput = document.getElementById("userInput");
     const sendButton = document.getElementById("sendButton");
-    const modelBadge = document.getElementById("modelBadge");
-    modelBadge.textContent = MODEL_ID;
+    document.getElementById("modelBadge").textContent = MODEL_ID;
 
-    // ========== STATE ==========
     let messages = [
       {
         role: "assistant",
@@ -116,26 +123,20 @@
       },
     ];
 
-    // ========== FUNCTIONS ==========
     function addMessage(role, text, isError = false) {
       const messageDiv = document.createElement("div");
       messageDiv.classList.add("message", role);
-
       const avatar = document.createElement("div");
       avatar.classList.add("avatar", role === "user" ? "user-avatar" : "bot-avatar");
       avatar.textContent = role === "user" ? "👤" : "🤖";
-
       const contentDiv = document.createElement("div");
       contentDiv.classList.add("message-content");
       if (isError) contentDiv.classList.add("error");
-
-      // Use marked.js if available for bot messages
       if (role === "bot" && !isError && typeof marked !== "undefined") {
         contentDiv.innerHTML = marked.parse(text);
       } else {
         contentDiv.textContent = text;
       }
-
       messageDiv.appendChild(avatar);
       messageDiv.appendChild(contentDiv);
       chatMessages.appendChild(messageDiv);
@@ -147,15 +148,12 @@
       const typingDiv = document.createElement("div");
       typingDiv.classList.add("message", "bot");
       typingDiv.id = "typingIndicator";
-
       const avatar = document.createElement("div");
       avatar.classList.add("avatar", "bot-avatar");
       avatar.textContent = "🤖";
-
       const content = document.createElement("div");
       content.classList.add("message-content");
       content.innerHTML = '<div class="typing-indicator"><span></span><span></span><span></span></div>';
-
       typingDiv.appendChild(avatar);
       typingDiv.appendChild(content);
       chatMessages.appendChild(typingDiv);
@@ -168,21 +166,23 @@
     }
 
     async function sendMessage() {
+      // Check for missing key before sending
+      if (OPENROUTER_API_KEY === "YOUR_NEW_API_KEY_HERE" || OPENROUTER_API_KEY === "") {
+        addMessage("bot", "⚠️ Missing API key! Please add your key in the code.", true);
+        return;
+      }
+
       const userText = userInput.value.trim();
       if (!userText) return;
 
-      // Disable UI
       userInput.disabled = true;
       sendButton.disabled = true;
 
-      // Add user message
       addMessage("user", userText);
       messages.push({ role: "user", content: userText });
       userInput.value = "";
 
       showTypingIndicator();
-
-      console.log("Sending to OpenRouter:", MODEL_ID);
 
       try {
         const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -190,7 +190,6 @@
           headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-            // Optional: add HTTP-Referer and X-Title headers for OpenRouter rankings
             "HTTP-Referer": window.location.href,
             "X-Title": "Nemotron Ultra Chat",
           },
@@ -214,14 +213,10 @@
 
         addMessage("bot", botReply);
         messages.push({ role: "assistant", content: botReply });
-
-        console.log("Reply received successfully.");
       } catch (error) {
         hideTypingIndicator();
-        console.error("API Error:", error);
         addMessage("bot", `⚠️ Error: ${error.message}`, true);
-        // Remove the user message from history because the request failed
-        messages.pop();
+        messages.pop(); // remove user message that caused failure
       } finally {
         userInput.disabled = false;
         sendButton.disabled = false;
@@ -229,21 +224,13 @@
       }
     }
 
-    // ========== EVENT LISTENERS ==========
-    sendButton.addEventListener("click", () => {
-      console.log("Send button clicked");
-      sendMessage();
-    });
-
+    sendButton.addEventListener("click", sendMessage);
     userInput.addEventListener("keypress", (e) => {
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
-        console.log("Enter key pressed");
         sendMessage();
       }
     });
-
-    console.log("Chat app initialized. Model:", MODEL_ID);
   </script>
 </body>
 </html>
