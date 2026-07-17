@@ -79,12 +79,12 @@
 <body>
   <div class="chat-container">
     <div class="chat-header">
-      <h1>✨ Verity Chat</h1>
+      <h1>Verity Chat</h1>
       <span class="model-badge" id="modelBadge">nvidia/nemotron-3-ultra-550b-a55b:free</span>
     </div>
     <div class="chat-messages" id="chatMessages">
       <div class="message bot">
-        <div class="avatar bot-avatar">🤖</div>
+        <div class="avatar bot-avatar">😊</div>
         <div class="message-content">
           Hello! I'm Verity I know everything. How can I help you today?
         </div>
@@ -128,7 +128,7 @@
       messageDiv.classList.add("message", role);
       const avatar = document.createElement("div");
       avatar.classList.add("avatar", role === "user" ? "user-avatar" : "bot-avatar");
-      avatar.textContent = role === "user" ? "👤" : "🤖";
+      avatar.textContent = role === "user" ? "👤" : "😊";
       const contentDiv = document.createElement("div");
       contentDiv.classList.add("message-content");
       if (isError) contentDiv.classList.add("error");
@@ -150,7 +150,7 @@
       typingDiv.id = "typingIndicator";
       const avatar = document.createElement("div");
       avatar.classList.add("avatar", "bot-avatar");
-      avatar.textContent = "🤖";
+      avatar.textContent = "😊";
       const content = document.createElement("div");
       content.classList.add("message-content");
       content.innerHTML = '<div class="typing-indicator"><span></span><span></span><span></span></div>';
