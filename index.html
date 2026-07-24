@@ -80,19 +80,19 @@
   <div class="chat-container">
     <div class="chat-header">
       <h1>Verity Chat</h1>
-      <span class="model-badge" id="modelBadge">nvidia/nemotron-3-ultra-550b-a55b:free</span>
+      <span class="model-badge" id="modelBadge">Verity</span>
     </div>
     <div class="chat-messages" id="chatMessages">
       <div class="message bot">
         <div class="avatar bot-avatar">😊</div>
         <div class="message-content">
-          Hello! I'm Verity I know everything. How can I help you today?
+          Hello! I'm Verity.Ask me anything I know everything.
         </div>
       </div>
       <!-- If key is missing, a warning will appear here -->
     </div>
     <div class="chat-input-area">
-      <input type="text" id="userInput" placeholder="Type your message I know it..." autofocus />
+      <input type="text" id="userInput" placeholder="Type your message I know everything..." autofocus />
       <button id="sendButton">Send</button>
     </div>
   </div>
@@ -118,8 +118,8 @@
 
     let messages = [
       {
-        role: "assistant",
-        content: "Hello! I'm Verity I know everything. How can I help you today?",
+        role: "Friend",
+        content: "Hello! I'm Verity.Ask me anything I know everything.",
       },
     ];
 
@@ -191,7 +191,7 @@
             "Content-Type": "application/json",
             "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
             "HTTP-Referer": window.location.href,
-            "X-Title": "Nemotron Ultra Chat",
+            "X-Title": "HI",
           },
           body: JSON.stringify({
             model: MODEL_ID,
@@ -212,7 +212,7 @@
         const botReply = data.choices[0].message.content;
 
         addMessage("bot", botReply);
-        messages.push({ role: "assistant", content: botReply });
+        messages.push({ role: "Friend", content: botReply });
       } catch (error) {
         hideTypingIndicator();
         addMessage("bot", `⚠️ Error: ${error.message}`, true);
